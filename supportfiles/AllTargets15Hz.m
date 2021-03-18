@@ -29,14 +29,14 @@ while (system_mode>=20)&&(system_mode<=25)
         if isprac
         Screen('DrawText',win.Number,['Press any key to start your ' num2str(nprac) ' practice trials'],win.Center(1)-220, win.Center(2)-10);
         else
-             Screen('DrawText',win.Number,['Press any key to start experimental trial ' num2str(trial) 'of ' num2str(ntrials)],win.Center(1)-220, win.Center(2)-10);
+             Screen('DrawText',win.Number,['Press any key to start experimental trial ' num2str(trial) ' of ' num2str(ntrials)],win.Center(1)-220, win.Center(2)-10);
         end
         Screen('Flip',win.Number);
         
         %turn off key echo
         ListenChar(2)
         
-        % WaitSecs(2);
+        WaitSecs(2);
         KbStrokeWait(-1);
         
         %% set modulating wave for flickering target
@@ -153,10 +153,11 @@ while (system_mode>=20)&&(system_mode<=25)
             buttonpressBottomLeft = respoBottomLeft;
             buttonpressBottomRight = respoBottomRight;
             
-            dataTopLeft = [options(trialdata{trial}.condition,1) waitframe(TL_index) waitframe(TR_index) waitframe(BL_index) waitframe(BR_index) catchTrials(options(trialdata{trial}.condition,1),1:4) Struct2mat(trialdata{trial}) catchTrials(options(trialdata{trial}.condition,1),6) catchTrials(options(trialdata{trial}.condition,1),7) buttonpressTopLeft];
-            dataTopRight = [options(trialdata{trial}.condition,1) waitframe(TL_index) waitframe(TR_index) waitframe(BL_index) waitframe(BR_index) catchTrials(options(trialdata{trial}.condition,1),1:4) Struct2mat(trialdata{trial}) catchTrials(options(trialdata{trial}.condition,1),6) catchTrials(options(trialdata{trial}.condition,1),7) buttonpressTopRight];
-            dataBottomLeft = [options(trialdata{trial}.condition,1) waitframe(TL_index) waitframe(TR_index) waitframe(BL_index) waitframe(BR_index) catchTrials(options(trialdata{trial}.condition,1),1:4) Struct2mat(trialdata{trial}) catchTrials(options(trialdata{trial}.condition,1),6) catchTrials(options(trialdata{trial}.condition,1),7) buttonpressBottomLeft];
-            dataBottomRight = [options(trialdata{trial}.condition,1) waitframe(TL_index) waitframe(TR_index) waitframe(BL_index) waitframe(BR_index) catchTrials(options(trialdata{trial}.condition,1),1:4) Struct2mat(trialdata{trial}) catchTrials(options(trialdata{trial}.condition,1),6) catchTrials(options(trialdata{trial}.condition,1),7) buttonpressBottomRight];       
+            % save the state of the targets, and each button press vector:
+            dataTopLeft = [options(trialdata{trial}.condition,1) params.waitframes(TL_index) params.waitframes(TR_index) params.waitframes(BL_index) params.waitframes(BR_index) catchTrials(options(trialdata{trial}.condition,1),1:4) Struct2mat(trialdata{trial}) catchTrials(options(trialdata{trial}.condition,1),6) catchTrials(options(trialdata{trial}.condition,1),7) buttonpressTopLeft];
+            dataTopRight = [options(trialdata{trial}.condition,1) params.waitframes(TL_index) params.waitframes(TR_index) params.waitframes(BL_index) params.waitframes(BR_index) catchTrials(options(trialdata{trial}.condition,1),1:4) Struct2mat(trialdata{trial}) catchTrials(options(trialdata{trial}.condition,1),6) catchTrials(options(trialdata{trial}.condition,1),7) buttonpressTopRight];
+            dataBottomLeft = [options(trialdata{trial}.condition,1) params.waitframes(TL_index) params.waitframes(TR_index) params.waitframes(BL_index) params.waitframes(BR_index) catchTrials(options(trialdata{trial}.condition,1),1:4) Struct2mat(trialdata{trial}) catchTrials(options(trialdata{trial}.condition,1),6) catchTrials(options(trialdata{trial}.condition,1),7) buttonpressBottomLeft];
+            dataBottomRight = [options(trialdata{trial}.condition,1) params.waitframes(TL_index) params.waitframes(TR_index) params.waitframes(BL_index) params.waitframes(BR_index) catchTrials(options(trialdata{trial}.condition,1),1:4) Struct2mat(trialdata{trial}) catchTrials(options(trialdata{trial}.condition,1),6) catchTrials(options(trialdata{trial}.condition,1),7) buttonpressBottomRight];       
             
             datam(1,1:size(dataTopLeft,2)) = dataTopLeft; % backup to save as .mat file at end of experiment
             datam(2,1:size(dataTopRight,2)) = dataTopRight;

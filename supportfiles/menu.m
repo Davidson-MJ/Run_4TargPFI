@@ -2,7 +2,7 @@
 % We either run a calibration procedure to define experimental parameters,
 % or launch the main experiment based on predefined params.
 system_mode = 1;
-ListenChar(2)
+% ListenChar(2)
 while (system_mode>0)
     %% Keyboard sanity check
     % draw text prompt

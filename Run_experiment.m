@@ -60,7 +60,7 @@ if proceedYN=='y'
         RetrieveSubjInfo
         
         %% Set up the screen   
-        ListenChar(2); % turn off key echo.
+%         ListenChar(2); % turn off key echo.
         
         win = SetScreen('BGColor',127,...
             'qFontSize',24,...
