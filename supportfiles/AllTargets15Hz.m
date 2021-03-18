@@ -1,11 +1,12 @@
-
+nprac=1; % the number of practice trials.
 %% Begin Stim Presentation
 while (system_mode>=20)&&(system_mode<=25)
-    
+    isprac=1;
     for trial = 1:ntrials+1 %%+1 so that it repeats the first trial twice
         
-        if trial>1 %%This section makes it repeat the first trial twice.
+        if trial>nprac %%This section makes it repeat npractrials 
             trial=trial-1;%%Allowing a practice trial
+            isprac=0;
         end
         
         trialdata{trial}.centricity = params.eccy;
@@ -25,7 +26,11 @@ while (system_mode>=20)&&(system_mode<=25)
         system_moderecord = zeros(1,empty_nframes);
         
         % draw text prompt
-        Screen('DrawText',win.Number,['Press any key to start trial ' num2str(trial) 'of ' num2str(ntrials)],win.Center(1)-220, win.Center(2)-10);
+        if isprac
+        Screen('DrawText',win.Number,['Press any key to start your ' num2str(nprac) ' practice trials'],win.Center(1)-220, win.Center(2)-10);
+        else
+             Screen('DrawText',win.Number,['Press any key to start experimental trial ' num2str(trial) 'of ' num2str(ntrials)],win.Center(1)-220, win.Center(2)-10);
+        end
         Screen('Flip',win.Number);
         
         %turn off key echo
@@ -47,7 +52,7 @@ while (system_mode>=20)&&(system_mode<=25)
         
         for frame = 1:trialduration
             
-            % Breaks if we finished
+            % Breaks if we have finished
             if frame > trialduration(end)
                 % Just in case final frame is not recorded, because that would
                 % break the frame fixing function
@@ -65,37 +70,26 @@ while (system_mode>=20)&&(system_mode<=25)
             iTest = frame;
             
             % Triggers for EEG
-            if EEG
+            if params.inEEGroom
                 if frame ==1
-                    io64(ioObj,portcode, 20); %% trigger for trial start
-                    %% 88 is trial ended
+                    io64(ioObj,portcode, 20); %% trigger for trial start                    
                 end
             end
             
-            % send trigger/event codes to tobii
-            %             if usetobii ==1;
-            %                 if frame == catchstart
-            %                     talk2tobii('EVENT', 'Trial_catch_start', 5 );
-            %
-            %                 elseif frame == catchend
-            %                     talk2tobii('EVENT', 'Trial_catch_end', 5 );
-            %                 end
-            %             else
-            %             end
-            
+          
             %% %% %% %% %% %% %% %% %% %% %%
             %% draw fixation cross and target  %%
             %% %% %% %% %% %% %% %% %% %% %%
             
-            if (system_mode == 20)
+            if (system_mode == 20) %draw background.
                 dynamicBackgr;
             end
             
-            % if (IsWedgeExperiment == 0)
+            if ~params.IsWedgeExperiment
                 DrawTargetCheckboard_15Hz;
-            % else
-            %     MydrawTargetwedge;
-            % end
+            else
+                MydrawTargetwedge;
+            end
             
             FixationCross;
 %             drawSquare;
@@ -105,9 +99,9 @@ while (system_mode>=20)&&(system_mode<=25)
             vbl = Screen('Flip', win.Number, vbl + (waitframes-0.5)*ifi);
             endFlip(frame)=GetSecs;
             
-            % collect button responses
+            % record screen state, and collect button responses
             
-            ecccenterrecord(frame) = p.eccy;
+            ecccenterrecord(frame) = params.eccy;
             TargetSizerecord(frame) = cir_size;
             Frerecord(1,frame) = TL_index;
             Frerecord(2,frame) = TR_index;
@@ -127,216 +121,32 @@ while (system_mode>=20)&&(system_mode<=25)
             
             
             if currkeyIsDown
-                
-                if any(find(keyCode)==UpLeft)
-                    respoTopLeft(frame) = 1;
-                end
-                if any(find(keyCode)==UpRight)
-                    respoTopRight(frame) = 1;
-                end
-                if any(find(keyCode)==LowLeft)
-                    respoBottomLeft(frame) = 1;
-                end
-                if any(find(keyCode)==LowRight)
-                    respoBottomRight(frame) = 1;
-                end
-                if EEG
-             io64(ioObj,portcode, bitshift(respoTopLeft(frame),3)+bitshift(respoTopRight(frame),2)+bitshift(respoBottomLeft(frame),1)+respoBottomRight(frame));
-                end
-                if sum (currKeyCode ~= pastKeyCode)
-                    
-                    if (IsWedgeExperiment == 0)
-                        if keyCode(key1)
-                            p.eccy = p.eccy - 10;
-                            p.eccx = p.eccx - 10;
-                            if  p.eccy<(p.targetsize/2)
-                                p.eccy=(p.targetsize/2);
-                            end
-                            if  p.eccx<(p.targetsize/2)
-                                p.eccx=(p.targetsize/2);
-                            end
-                            
-                        elseif keyCode(key2)
-                            p.eccy = p.eccy + 10;
-                            p.eccx = p.eccx + 10;
-                            if p.eccx>min(win.Center(2)-(p.targetsize/2),win.Center(1)-(p.targetsize/2))
-                                p.eccx=min(win.Center(2)-(p.targetsize/2),win.Center(1)-(p.targetsize/2));
-                            end
-                            if p.eccy>min(win.Center(2)-(p.targetsize/2),win.Center(1)-(p.targetsize/2))
-                                p.eccy=min(win.Center(2)-(p.targetsize/2),win.Center(1)-(p.targetsize/2));
-                            end
-                        end
-                    end
-                    
-                    if any(find(keyCode)==Return)
-                        system_mode = system_mode + 1;
-                        if (system_mode > 25)
-                            system_mode = 20;
-                        end
-                    end
-                    
-                    if keyCode(shift)
-                        IsWedgeExperiment = ~IsWedgeExperiment;
-                    end
-                    
-                    if (IsWedgeExperiment == 1)
-                        if keyCode(key1)
-                            angle = angle - 1;
-                            if  angle<=1
-                                angle=1;
-                            end
-                        elseif keyCode(key2)
-                            angle = angle + 1;
-                            if angle>=10
-                                angle=10;
-                            end
-                        end
-                    end
-                    
-                    if keyCode(F1)
-                        cir_size = cir_size - 1;
-                        if  cir_size<=1
-                            cir_size=1;
-                        end
-                    elseif keyCode(F2)
-                        cir_size = cir_size + 1;
-                        if cir_size>=6
-                            cir_size=6;
-                        end
-                    end
-                    
-                    if keyCode(F3)
-                        disccolour_R = disccolour_R + 5;
-                        if (disccolour_R > 255)
-                            disccolour_R = 180;
-                        end
-                    end
-                    
-                    if keyCode(F4)
-                        disccolour_G = disccolour_G + 5;
-                        if (disccolour_G > 255)
-                            disccolour_G = 180;
-                        end
-                    end
-                    
-                    if keyCode(F5)
-                        disccolour_B = disccolour_B + 5;
-                        if (disccolour_B > 255)
-                            disccolour_B = 180;
-                        end
-                    end
-                    
-                    if keyCode(F9)
-                        TL_index = TL_index + 1;
-                        if (TL_index > 4)
-                            TL_index = 1;
-                        end
-                    end
-                    
-                    if keyCode(F10)
-                        TR_index = TR_index + 1;
-                        if (TR_index > 4)
-                            TR_index = 1;
-                        end
-                    end
-                    
-                    if keyCode(F11)
-                        BL_index = BL_index + 1;
-                        if (BL_index > 4)
-                            BL_index = 1;
-                        end
-                    end
-                    
-                    if keyCode(F12)
-                        BR_index = BR_index + 1;
-                        if (BR_index > 4)
-                            BR_index = 1;
-                        end
-                    end
-                    
-                    
-                    if keyCode(key3)
-                        denindex = denindex - 1;
-                        if  denindex<=1
-                            denindex=1;
-                        end
-                    elseif keyCode(key4)
-                        denindex = denindex + 1;
-                        if denindex>=17
-                            denindex=17;
-                        end
-                    end
-                    
-                end
-                
-                % check for quit key
-                if any(find(keyCode)==quitkey)
-                    io64(ioObj,portcode, 80);
-                    system_mode = 1;
-                    break;
-                end
+               
+              checkKeymappings;
             end
-            
-            if (pastkeyIsDown == 1)&&(currkeyIsDown == 0) && EEG
+            % check for quit key
+            if any(find(keyCode)==quitkey)
+%                 io64(ioObj,portcode, 80);
+                system_mode = 1;
+                break;
+            end
+            if (pastkeyIsDown == 1)&&(currkeyIsDown == 0) && params.inEEGroom
                 io64(ioObj,portcode,77);
             end
             
             pastKeyCode = currKeyCode;
             pastkeyIsDown = currkeyIsDown;
             
-            
-            %             if usetobii ==1
-            %
-            %                 if frame>1
-            %                     if (respo(frame) == 1 && respo(frame-1) == 0)
-            %                         talk2tobii('EVENT', 'Trial_button_press', 5 );
-            %                     elseif (respo(frame) == 0 && respo(frame-1) == 1)
-            %                         talk2tobii('EVENT', 'Trial_button_release', 5 );
-            %                     end
-            %                 end
-            %             else
-            %             end
-            % Screen('Close', [blobtexLoc1 blobtexLoc2 blobtexLoc3 blobtexLoc4]); %texindexes(backgroundcounter,1)
-            % Screen('Close', checkerTexture); %texindexes(backgroundcounter,1)
-        end
+          
+        end % for each frame in the trial, store the data.
         
-        %         buttonpressTopLeft = respoTopLeft;
-        %         buttonpressTopRight = respoTopRight;
-        %         buttonpressBottomLeft = respoBottomLeft;
-        %         buttonpressBottomRight = respoBottomRight;
-        %
-        %         dataTopLeft = [options(trialdata{trial}.condition,:) catchTrials(options(trialdata{trial}.condition,1),:) Struct2mat(trialdata{trial}) catchstart catchend buttonpressTopLeft];
-        %         dataTopRight = [options(trialdata{trial}.condition,:) catchTrials(options(trialdata{trial}.condition,1),:) Struct2mat(trialdata{trial}) catchstart catchend buttonpressTopRight];
-        %         dataBottomLeft = [options(trialdata{trial}.condition,:) catchTrials(options(trialdata{trial}.condition,1),:) Struct2mat(trialdata{trial}) catchstart catchend buttonpressBottomLeft];
-        %         dataBottomRight = [options(trialdata{trial}.condition,:) catchTrials(options(trialdata{trial}.condition,1),:) Struct2mat(trialdata{trial}) catchstart catchend buttonpressBottomRight];
-        %
-        %         datam(1,trial,1:size(dataTopLeft,2)) = dataTopLeft; % backup to save as .mat file at end of experiment
-        %         datam(2,trial,1:size(dataTopRight,2)) = dataTopRight;
-        %         datam(3,trial,1:size(dataBottomLeft,2)) = dataBottomLeft;
-        %         datam(4,trial,1:size(dataBottomRight,2)) = dataBottomRight;
-        %
-        %         if debugging<1
-        %             cd(savebasesubject)
-        %             if saveq==1
-        %                 SaveToFile(dataTopLeft,'FileName',[subject '_TL_TF_flickerExp.txt']);
-        %                 SaveToFile(dataTopRight,'FileName',[subject '_TR_TF_flickerExp.txt']);
-        %                 SaveToFile(dataBottomLeft,'FileName',[subject '_BL_TF_flickerExp.txt']);
-        %                 SaveToFile(dataBottomRight,'FileName',[subject '_BR_TF_flickerExp.txt']);
-        %             end
-        %         end
-        %         %             cd(taskpath)
-        %         %         end
-        %
-        %         filename = ['Trial' num2str(trial) '_data.mat'];
-        %         save(filename, 'datam', 'dataTopLeft', 'dataTopRight', 'dataBottomLeft', 'dataBottomRight', 'trialdata', 'options', 'startFlip', 'endFlip')
-        %         clearvars datam dataBottomLeft dataBottomRight dataTopLeft dataTopRight vblTimes startFlip endFlip
-        
+      
         %%
-        if system_mode ~= 1;
+        if system_mode ~= 1
             
             endTime = clock;
-            if EEG
-            io64(ioObj,portcode, 88);
+            if params.inEEGroom %send trigger for trial end.
+                io64(ioObj,portcode, 88); % 
             end
             buttonpressTopLeft = respoTopLeft;
             buttonpressTopRight = respoTopRight;
@@ -353,26 +163,21 @@ while (system_mode>=20)&&(system_mode<=25)
             datam(3,1:size(dataBottomLeft,2)) = dataBottomLeft;
             datam(4,1:size(dataBottomRight,2)) = dataBottomRight;
             
-            if debugging<1
+%             if debugging<1
                 cd(savebasesubject)
-                if saveq==1
-                    %                 SaveToFile(dataTopLeft,'FileName',[subject '_TL_TF_flickerExp.txt']);
-                    %                 SaveToFile(dataTopRight,'FileName',[subject '_TR_TF_flickerExp.txt']);
-                    %                 SaveToFile(dataBottomLeft,'FileName',[subject '_BL_TF_flickerExp.txt']);
-                    %                 SaveToFile(dataBottomRight,'FileName',[subject '_BR_TF_flickerExp.txt']);
-                end
-            end
-            %             cd(taskpath)
-            %         end
-            
-            filename = ['AllTarget15Hz_Trial' num2str(trial) '_data.mat'];
-            save(filename, 'datam', 'dataTopLeft', 'dataTopRight', 'dataBottomLeft', 'dataBottomRight','endFlip','ecccenterrecord','endTime','startTime', ...
-                'TargetSizerecord','Frerecord','system_moderecord','trialdata', 'options','catchTrials')
-            clearvars datam dataBottomLeft dataBottomRight dataTopLeft dataTopRight vblTimes startFlip endFlip ecccenterrecord ...
-                TargetSizerecord freTLrecord freTRrecord freBLrecord freBRrecord system_moderecord
+             
+                
+                filename = ['AllTarget15Hz_Trial' num2str(trial) '_data.mat'];
+                save(filename, 'datam', 'dataTopLeft', 'dataTopRight', 'dataBottomLeft', 'dataBottomRight','endFlip','ecccenterrecord','endTime','startTime', ...
+                    'TargetSizerecord','Frerecord','system_moderecord','trialdata', 'options','catchTrials')
+                
+                
+%             end
+         clearvars datam dataBottomLeft dataBottomRight dataTopLeft dataTopRight vblTimes startFlip endFlip ecccenterrecord ...
+                    TargetSizerecord freTLrecord freTRrecord freBLrecord freBRrecord system_moderecord
         else
             break;
         end
-    end
+    end %% for all ntrials +1
     system_mode = 0;
-end
+end % while system_mode = experiment

@@ -8,9 +8,9 @@ if (params.Circle_Prepare == 1)
     
     MyTargetTexture=zeros(100,1);
     
-    
+    counter =1;
     for imSize = 100:20:200                          % image size: n X n
-        
+        disp(['... preparing disc target sizes ' num2str(counter) ' of 6'])
         [X,Y]=meshgrid(1:imSize/10+1);
         gaussSD=25;
         xx=normpdf(X,(imSize/10+1)/2,gaussSD);
@@ -52,6 +52,7 @@ if (params.Circle_Prepare == 1)
             save(filename,'Texture');
             
         end
+        counter=counter+1
     end
 end
 

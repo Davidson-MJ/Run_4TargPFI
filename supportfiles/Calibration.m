@@ -135,144 +135,8 @@ while (system_mode>=10)
         end
         
         if currkeyIsDown
+            checkKeymappings
             
-            if any(find(keyCode)==TopLeft)
-                respoTopLeft(frame) = 1;
-            end
-            if any(find(keyCode)==TopRight)
-                respoTopRight(frame) = 1;
-            end
-            if any(find(keyCode)==BottomLeft)
-                respoBottomLeft(frame) = 1;
-            end
-            if any(find(keyCode)==BottomRight)
-                respoBottomRight(frame) = 1;
-            end
-            %only use to send portcodes.
-            if params.inEEGroom
-            io64(ioObj,portcode, bitshift(respoTopLeft(frame),3)+bitshift(respoTopRight(frame),2)+bitshift(respoBottomLeft(frame),1)+respoBottomRight(frame));
-            end
-            if sum (currKeyCode ~= pastKeyCode)
-                
-                if (params.IsWedgeExperiment == 0)
-                    if keyCode(key1)
-                        params.eccy = params.eccy - 10;
-                        params.eccx = params.eccx - 10;
-                        if  params.eccy<(params.targetSize/2)
-                            params.eccy=(params.targetSize/2);
-                        end
-                        if  params.eccx<(params.targetSize/2)
-                            params.eccx=(params.targetSize/2);
-                        end
-                        
-                    elseif keyCode(key2)
-                        params.eccy = params.eccy + 10;
-                        params.eccx = params.eccx + 10;
-                        if params.eccx>min(win.Center(2)-(params.targetSize/2),win.Center(1)-(params.targetSize/2))
-                            params.eccx=min(win.Center(2)-(params.targetSize/2),win.Center(1)-(params.targetSize/2));
-                        end
-                        if params.eccy>min(win.Center(2)-(params.targetSize/2),win.Center(1)-(params.targetSize/2))
-                            params.eccy=min(win.Center(2)-(params.targetSize/2),win.Center(1)-(params.targetSize/2));
-                        end
-                    end
-                end
-                
-                if any(find(keyCode)==Return)
-                    BG_on = ~BG_on;
-                end
-                
-                if keyCode(shift)
-                    IsWedgeExperiment = ~IsWedgeExperiment;
-                end
-                
-                if (params.IsWedgeExperiment == 1)
-                    if keyCode(key1)
-                        angle = angle - 1;
-                        if  angle<=1
-                            angle=1;
-                        end
-                    elseif keyCode(key2)
-                        angle = angle + 1;
-                        if angle>=10
-                            angle=10;
-                        end
-                    end
-                end
-                
-                if keyCode(F1)
-                    cir_size = cir_size - 1;
-                    if  cir_size<=1
-                        cir_size=1;
-                    end
-                elseif keyCode(F2)
-                    cir_size = cir_size + 1;
-                    if cir_size>=6
-                        cir_size=6;
-                    end
-                end
-                
-                if keyCode(F3)
-                    params.disccolour(1,1) = params.disccolour(1,1) + 5;
-                    if (params.disccolour(1,1)> 255)
-                        params.disccolour(1,1) = 180;
-                    end
-                end
-                
-                if keyCode(F4)
-                    params.disccolour(1,2) = params.disccolour(1,2) + 5;
-                    if (params.disccolour(1,2)> 255)
-                        params.disccolour(1,2) = 180;
-                    end
-                end
-                
-                if keyCode(F5)
-                    params.disccolour(1,3) = params.disccolour(1,3) + 5;
-                    if (params.disccolour(1,3)> 255)
-                        params.disccolour(1,3) = 180;
-                    end
-                end
-                
-                if keyCode(F9)
-                    TL_index = TL_index + 1;
-                    if (TL_index > 4)
-                        TL_index = 1;
-                    end
-                end
-                
-                if keyCode(F10)
-                    TR_index = TR_index + 1;
-                    if (TR_index > 4)
-                        TR_index = 1;
-                    end
-                end
-                
-                if keyCode(F11)
-                    BL_index = BL_index + 1;
-                    if (BL_index > 4)
-                        BL_index = 1;
-                    end
-                end
-                
-                if keyCode(F12)
-                    BR_index = BR_index + 1;
-                    if (BR_index > 4)
-                        BR_index = 1;
-                    end
-                end
-                
-                if keyCode(key3)
-                    denindex = denindex - 1;
-                    if  denindex<=1
-                        denindex=1;
-                    end
-                elseif keyCode(key4)
-                    denindex = denindex + 1;
-                    if denindex>=17
-                        denindex=17;
-                    end
-                end
-                
-            end
             
             % check for quit key
             if any(find(keyCode)==quitkey)
@@ -297,7 +161,7 @@ while (system_mode>=10)
     %%
     if system_mode ~= 1
         endTime = clock;
-        if EEG
+        if params.inEEGroom
         io64(ioObj,portcode, 88);
         end
         buttonpressTopLeft = respoTopLeft;
@@ -316,6 +180,7 @@ while (system_mode>=10)
         datam(4,1:size(dataBottomRight,2)) = dataBottomRight;
         
         %% save trial output.
+        cd(savebasesubject)
         filename = ['Calibration_Trial' num2str(trial) '_data.mat'];
         save(filename, 'datam', 'dataTopLeft', 'dataTopRight', 'dataBottomLeft', 'dataBottomRight','endFlip', ... 
             'ecccenterrecord','endTime','startTime','TargetSizerecord','Frerecord','Targets_onrecord')

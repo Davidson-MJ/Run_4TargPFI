@@ -2,7 +2,7 @@
 % We either run a calibration procedure to define experimental parameters,
 % or launch the main experiment based on predefined params.
 system_mode = 1;
-
+ListenChar(2)
 while (system_mode>0)
     %% Keyboard sanity check
     % draw text prompt
@@ -40,7 +40,7 @@ while (system_mode>0)
                 system_mode = 30;
             end
             
-            % check for quit key
+            % check for quit key1
             if any(find(keyCode)==ESC)
                 system_mode = 0;
                 error('User ended program.')
@@ -52,7 +52,7 @@ while (system_mode>0)
     end
     
     switch system_mode 
-        case 102
+        case 10
             Calibration;
         case 20
             ComputeCatchTrials;

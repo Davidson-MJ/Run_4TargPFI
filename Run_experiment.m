@@ -13,18 +13,20 @@
 close all; clear all;
 
 params=[];
-params.debugging=1; %1 to throw a smaller window and skip sync tests.
+params.debugging=0; %1 to throw a smaller window and skip sync tests.
 params.offscreen=1; %1 for dual monitor set up
 params.inEEGroom = 0; %1 for use with Monash Biomedical Imaging EEG lab (sends triggers etc)
 
 % Variables
 params.BG_pixel = 10;  % [in pixels, a multiple of 2] This sets the background pixel size
-params.BG_Prepare = 0; % If BG_pixel is changed, set BG_Prepare to 1, otherwise 
+params.BG_Prepare = 0; % If location is changed, set BG_Prepare to 1, otherwise 
 % always set to 0, as pregenerating the BG takes time.
 
-params.Circle_Prepare = 0; % precompute the circular targets
+params.Circle_Prepare = 0; % as above, but for circular targets
 params.denindex = 9; % density index of background. [density = 10:5:90];
-params.IsWedgeExperiment = 0;
+
+params.IsWedgeExperiment = 0; %
+params.wedge_Prepare = 0; %prepare wedges for presentation.
 
 %Target Parameters. 
 % RGB colour values for the 'white' space between dark pixels.
@@ -45,9 +47,12 @@ addpath( [ pwd filesep 'supportfiles'])
 
 % Assign the target flicker to each location, balanced across 48 trials.
 ComputeConditions;  
-% Create output folder, keyboard set up etc:
+
+% Create output folder, asign keyboard values:
 startup_prep;
 
+%% Note that this is only for running on a Macbook: *comment out*!
+Screen('Preference', 'SkipSyncTests', 1) 
 %%
 if proceedYN=='y'
     try
@@ -69,12 +74,13 @@ if proceedYN=='y'
         
         %% These next steps are COSTLY. Toggle whether to run them or not
         % prepare and preload varying background density textures.
-        % By preloading, we can toggle the density in real-time:
+        
+        % By preloading, we can toggle the density in real-time, during calibration:
         PrepDynBackground;
         
         % Same for targets:
         MyPrepareTexture;
-%         MyPrepareTexturewedge;
+        MyPrepareTexturewedge;
        
         %% Construct input parameters for trial types
         ParameterSet;
@@ -138,7 +144,7 @@ if proceedYN=='y'
     % ?	As above
 
         %% THIS LAUNCHES THE Main Experiment >
-        ListenChar(2)
+        ListenChar(2) %listen to keyboard, suppress output.
         menu;
         
         %% Save at subject level.
