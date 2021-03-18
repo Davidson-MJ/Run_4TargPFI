@@ -2,13 +2,13 @@
 %% Begin Stim Presentation
 while (system_mode>=20)&&(system_mode<=25)
     
-    for trial = 1:ntrials+1; %%+1 so that it repeats the first trial twice
+    for trial = 1:ntrials+1 %%+1 so that it repeats the first trial twice
         
         if trial>1 %%This section makes it repeat the first trial twice.
             trial=trial-1;%%Allowing a practice trial
         end
         
-        trialdata{trial}.centricity = p.eccy;
+        trialdata{trial}.centricity = params.eccy;
         
         %set parameters for catch trial (where target is removed)
         %CatchParams;
