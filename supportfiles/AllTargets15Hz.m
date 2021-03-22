@@ -120,9 +120,20 @@ while (system_mode>=20)&&(system_mode<=25)
             end
             
             
-            if currkeyIsDown
-               
-              checkKeymappings;
+            if currkeyIsDown               
+                %% responses for disappearance (PFI):
+                if any(find(keyCode)==TopLeft)
+                    respoTopLeft(frame) = 1;
+                end
+                if any(find(keyCode)==TopRight)
+                    respoTopRight(frame) = 1;
+                end
+                if any(find(keyCode)==BottomLeft)
+                    respoBottomLeft(frame) = 1;
+                end
+                if any(find(keyCode)==BottomRight)
+                    respoBottomRight(frame) = 1;
+                end
             end
             % check for quit key
             if any(find(keyCode)==quitkey)
